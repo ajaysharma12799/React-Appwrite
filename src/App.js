@@ -1,25 +1,45 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Login from "./screens/Login";
+import Register from "./screens/Register";
+import Profile from "./screens/Profile";
+import Navbar from "./components/Navbar";
+import { account } from "./appwrite/appwrite";
 
-function App() {
+const App = () => {
+  const [currentUser, setCurrentUser] = useState(null);
+
+  const getSession = () => {
+    const session = account.get();
+    session
+      .then((resp) => {
+        setCurrentUser(resp);
+      })
+      .catch((error) => {
+        console.log(error);
+        setCurrentUser(null);
+      });
+  };
+
+  useEffect(() => {
+    getSession();
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <React.Fragment>
+      <BrowserRouter>
+        <Navbar currentUser={currentUser} />
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route
+            path="/profile"
+            element={<Profile currentUser={currentUser} />}
+          />
+        </Routes>
+      </BrowserRouter>
+    </React.Fragment>
   );
-}
+};
 
 export default App;
